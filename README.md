@@ -1,4 +1,4 @@
-# Yarn Inventory Management SaaS — v2.0
+# Yarn Inventory Management
 
 A multi-tenant Yarn Inventory Management application built around the notebook workflow: Quality → Stock Entry → Beam Ready → Inventory, with Party/Company/Quality analytics.
 
@@ -42,11 +42,11 @@ npm run dev
 Open the Vite URL. The default API is `http://localhost:5000/api`.
 
 ### Demo account
-`owner@demoyarn.local` / `ChangeMe123!`
+`owner@demoyarn.local` / `ChangeMe123`
 
 Change the demo password before using outside local development.
 
-## SaaS security notes
+## Security notes
 The API scopes all operational records to the authenticated `companyId`, validates company/quality/party references, checks user and company status on requests, hashes passwords, supports refresh-session revocation on logout, applies Helmet and auth rate limiting, and uses role guards for administrative operations.
 
 For a production deployment, put the API behind HTTPS, use strong secret values, configure a strict `CLIENT_URL`, add a managed MongoDB cluster with backups, and move refresh tokens to secure httpOnly cookies if the deployment architecture permits it.
