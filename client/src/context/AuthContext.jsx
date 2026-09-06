@@ -11,9 +11,9 @@ export function AuthProvider({ children }) {
   const refresh = useCallback(async () => {
     try {
       const data = await authApi.me();
-      setUser(data.user);
-      setTenant(data.tenant);
-      setStatus('authenticated');
+      setUser(data.user || null);
+      setTenant(data.tenant || null);
+      setStatus(data.user ? 'authenticated' : 'anonymous');
     } catch {
       setUser(null);
       setTenant(null);

@@ -3,7 +3,6 @@ import { StockEntry } from '../models/StockEntry.js';
 import { Beam } from '../models/Beam.js';
 import { catchAsync } from '../utils/catchAsync.js';
 import { ApiError } from '../utils/ApiError.js';
-import { recordAudit } from '../services/auditService.js';
 import { parsePagination, buildPageMeta } from '../utils/pagination.js';
 
 export const listQualities = catchAsync(async (req, res) => {
@@ -43,7 +42,6 @@ export const createQuality = catchAsync(async (req, res) => {
     shades: (shades || []).map((s) => ({ name: s })),
     createdBy: req.user._id,
   });
-  await recordAudit({ req, action: 'quality.created', entityType: 'Quality', entityId: quality._id, metadata: { name } });
   res.status(201).json({ item: quality });
 });
 
@@ -54,7 +52,6 @@ export const updateQuality = catchAsync(async (req, res) => {
     { new: true, runValidators: true }
   );
   if (!quality) throw ApiError.notFound('Quality not found');
-  await recordAudit({ req, action: 'quality.updated', entityType: 'Quality', entityId: quality._id, metadata: req.body });
   res.json({ item: quality });
 });
 
@@ -65,7 +62,6 @@ export const deleteQuality = catchAsync(async (req, res) => {
   }
   const quality = await Quality.findOneAndDelete({ _id: req.params.id, tenant: req.tenantId });
   if (!quality) throw ApiError.notFound('Quality not found');
-  await recordAudit({ req, action: 'quality.deleted', entityType: 'Quality', entityId: quality._id });
   res.json({ success: true });
 });
 
@@ -76,7 +72,6 @@ export const addShade = catchAsync(async (req, res) => {
   if (dupe) throw ApiError.conflict('This shade already exists for this quality');
   quality.shades.push({ name: req.body.name });
   await quality.save();
-  await recordAudit({ req, action: 'quality.shade_added', entityType: 'Quality', entityId: quality._id, metadata: { shade: req.body.name } });
   res.status(201).json({ item: quality });
 });
 
@@ -88,7 +83,6 @@ export const updateShade = catchAsync(async (req, res) => {
   if (req.body.name) shade.name = req.body.name;
   if (req.body.status) shade.status = req.body.status;
   await quality.save();
-  await recordAudit({ req, action: 'quality.shade_updated', entityType: 'Quality', entityId: quality._id, metadata: { shadeId: req.params.shadeId, ...req.body } });
   res.json({ item: quality });
 });
 
@@ -99,7 +93,6 @@ export const deleteShade = catchAsync(async (req, res) => {
   if (!quality) throw ApiError.notFound('Quality not found');
   quality.shades.id(req.params.shadeId)?.deleteOne();
   await quality.save();
-  await recordAudit({ req, action: 'quality.shade_deleted', entityType: 'Quality', entityId: quality._id, metadata: { shadeId: req.params.shadeId } });
   res.json({ item: quality });
 });
 

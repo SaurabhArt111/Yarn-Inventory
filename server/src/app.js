@@ -1,7 +1,6 @@
 import express from 'express';
 import cookieParser from 'cookie-parser';
 import compression from 'compression';
-import morgan from 'morgan';
 import { env } from './config/env.js';
 import { isDbReady, getDbStatus } from './config/db.js';
 import { securityHeaders, corsMiddleware, apiRateLimiter } from './middleware/security.js';
@@ -17,7 +16,6 @@ import dashboardRoutes from './routes/dashboardRoutes.js';
 import analyticsRoutes from './routes/analyticsRoutes.js';
 import reportRoutes from './routes/reportRoutes.js';
 import staffRoutes from './routes/staffRoutes.js';
-import auditRoutes from './routes/auditRoutes.js';
 import importRoutes from './routes/importRoutes.js';
 
 export function createApp() {
@@ -33,7 +31,6 @@ export function createApp() {
   app.use(express.json({ limit: '2mb' }));
   app.use(express.urlencoded({ extended: true, limit: '2mb' }));
   app.use(cookieParser());
-  app.use(morgan(env.isProd ? 'combined' : 'dev'));
   app.use('/api', apiRateLimiter);
 
   // Health check never requires DB or auth -- used by orchestrators and by
@@ -53,7 +50,6 @@ export function createApp() {
   app.use('/api/analytics', analyticsRoutes);
   app.use('/api/reports', reportRoutes);
   app.use('/api/staff', staffRoutes);
-  app.use('/api/audit-logs', auditRoutes);
   app.use('/api/import', importRoutes);
 
   app.use(notFoundHandler);

@@ -6,7 +6,6 @@ import { ROLES, permissionsForRole } from '../constants/permissions.js';
 import { issueToken, setAuthCookie, clearAuthCookie } from '../middleware/auth.js';
 import { catchAsync } from '../utils/catchAsync.js';
 import { ApiError } from '../utils/ApiError.js';
-import { recordAudit } from '../services/auditService.js';
 
 function slugify(name) {
   return (
@@ -90,13 +89,6 @@ export const register = catchAsync(async (req, res) => {
   setAuthCookie(res, token);
   req.user = user;
   req.tenantId = String(tenant._id);
-  await recordAudit({
-    req,
-    action: 'auth.register',
-    entityType: 'Tenant',
-    entityId: tenant._id,
-    metadata: { companyName },
-  });
 
   res.status(201).json({ user: user.toSafeJSON(), tenant: sanitizeTenant(tenant) });
 });
@@ -128,21 +120,17 @@ export const login = catchAsync(async (req, res, next) => {
 
   req.user = user;
   req.tenantId = String(user.tenant);
-  await recordAudit({ req, action: 'auth.login', entityType: 'User', entityId: user._id });
-
   const tenant = await Tenant.findById(user.tenant);
   res.json({ user: user.toSafeJSON(), tenant: sanitizeTenant(tenant) });
 });
 
 export const logout = catchAsync(async (req, res) => {
-  if (req.user) {
-    await recordAudit({ req, action: 'auth.logout', entityType: 'User', entityId: req.user._id });
-  }
   clearAuthCookie(res);
   res.json({ success: true });
 });
 
 export const me = catchAsync(async (req, res) => {
+  if (!req.user) return res.json({ user: null, tenant: null });
   const tenant = await Tenant.findById(req.tenantId);
   res.json({ user: req.user.toSafeJSON(), tenant: sanitizeTenant(tenant) });
 });

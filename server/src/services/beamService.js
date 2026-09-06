@@ -4,7 +4,6 @@ import { InventoryTransaction } from '../models/InventoryTransaction.js';
 import { nextSequence, formatReference } from '../models/Counter.js';
 import { calculateBeamWeightKg, assertSufficientCones } from '../utils/inventoryMath.js';
 import { runInTransaction, consumeForBeam, getStockBalance } from './inventoryService.js';
-import { recordAudit } from './auditService.js';
 import { ApiError } from '../utils/ApiError.js';
 
 /**
@@ -151,17 +150,3 @@ export async function cancelBeam({ tenantId, userId, beamId, reason }) {
   return beam;
 }
 
-export function attachAuditForBeamCreation(req, beam) {
-  return recordAudit({
-    req,
-    action: 'beam.created',
-    entityType: 'Beam',
-    entityId: beam._id,
-    metadata: {
-      reference: beam.reference,
-      beamWeightKg: beam.beamWeightKg,
-      consumedCones: beam.consumedCones,
-      sourceStockEntry: beam.sourceStockEntry,
-    },
-  });
-}

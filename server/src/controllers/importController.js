@@ -1,6 +1,5 @@
 import { catchAsync } from '../utils/catchAsync.js';
 import { ApiError } from '../utils/ApiError.js';
-import { recordAudit } from '../services/auditService.js';
 import * as importService from '../services/importService.js';
 
 // Step 1-5: upload + parse + validate + return a preview/summary. Nothing
@@ -18,11 +17,5 @@ export const previewQualityImport = catchAsync(async (req, res) => {
 export const confirmQualityImport = catchAsync(async (req, res) => {
   const { names } = req.body;
   const result = await importService.confirmImport(req.tenantId, req.user._id, names);
-  await recordAudit({
-    req,
-    action: 'quality.imported',
-    entityType: 'Quality',
-    metadata: { imported: result.imported, skipped: result.skipped },
-  });
   res.status(201).json(result);
 });

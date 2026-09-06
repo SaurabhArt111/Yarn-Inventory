@@ -2,7 +2,6 @@ import { Beam } from '../models/Beam.js';
 import { StockEntry } from '../models/StockEntry.js';
 import { catchAsync } from '../utils/catchAsync.js';
 import { ApiError } from '../utils/ApiError.js';
-import { recordAudit } from '../services/auditService.js';
 import { parsePagination, buildPageMeta } from '../utils/pagination.js';
 import * as beamService from '../services/beamService.js';
 import { getStockBalance } from '../services/inventoryService.js';
@@ -120,7 +119,6 @@ export const createBeam = catchAsync(async (req, res) => {
     userId: req.user._id,
     input: req.body,
   });
-  await beamService.attachAuditForBeamCreation(req, beam);
   res.status(201).json({ item: beam, balanceBefore });
 });
 
@@ -131,7 +129,6 @@ export const updateBeam = catchAsync(async (req, res) => {
     { new: true, runValidators: true }
   );
   if (!beam) throw ApiError.notFound('Beam not found');
-  await recordAudit({ req, action: 'beam.updated', entityType: 'Beam', entityId: beam._id, metadata: req.body });
   res.json({ item: beam });
 });
 
@@ -142,6 +139,5 @@ export const cancelBeam = catchAsync(async (req, res) => {
     beamId: req.params.id,
     reason: req.body.reason,
   });
-  await recordAudit({ req, action: 'beam.cancelled', entityType: 'Beam', entityId: beam._id, metadata: { reason: req.body.reason } });
   res.json({ item: beam });
 });

@@ -39,7 +39,6 @@ const NAV = [
   {
     items: [
       { label: 'Staff', to: '/staff', permission: PERMISSIONS.STAFF_VIEW },
-      { label: 'Audit Log', to: '/audit', permission: PERMISSIONS.AUDIT_VIEW },
       { label: 'Settings', to: '/settings', permission: PERMISSIONS.SETTINGS_MANAGE },
     ],
   },

@@ -41,7 +41,6 @@ export const PERMISSIONS = Object.freeze({
 
   SETTINGS_MANAGE: 'settings.manage',
 
-  AUDIT_VIEW: 'audit.view',
 });
 
 export const ALL_PERMISSIONS = Object.values(PERMISSIONS);

@@ -18,7 +18,6 @@ import PartyAnalysis from './pages/analytics/PartyAnalysis.jsx';
 import CompanyAnalysis from './pages/analytics/CompanyAnalysis.jsx';
 import Reports from './pages/reports/Reports.jsx';
 import Staff from './pages/staff/Staff.jsx';
-import AuditLog from './pages/audit/AuditLog.jsx';
 import Settings from './pages/settings/Settings.jsx';
 
 function Gate({ permission, children }) {
@@ -70,7 +69,6 @@ export default function App() {
 
         <Route path="reports" element={<Gate permission={PERMISSIONS.REPORTS_VIEW}><Reports /></Gate>} />
         <Route path="staff" element={<Gate permission={PERMISSIONS.STAFF_VIEW}><Staff /></Gate>} />
-        <Route path="audit" element={<Gate permission={PERMISSIONS.AUDIT_VIEW}><AuditLog /></Gate>} />
         <Route path="settings" element={<Gate permission={PERMISSIONS.SETTINGS_MANAGE}><Settings /></Gate>} />
       </Route>
 

@@ -1,6 +1,5 @@
 import { catchAsync } from '../utils/catchAsync.js';
 import { ApiError } from '../utils/ApiError.js';
-import { recordAudit } from '../services/auditService.js';
 import { parsePagination, buildPageMeta } from '../utils/pagination.js';
 
 function escapeRegex(str) {
@@ -47,7 +46,6 @@ export function createMasterController(Model, { label, usageCheck } = {}) {
 
   const create = catchAsync(async (req, res) => {
     const item = await Model.create({ ...req.body, tenant: req.tenantId, createdBy: req.user._id });
-    await recordAudit({ req, action: `${entityType.toLowerCase()}.created`, entityType, entityId: item._id, metadata: { name: item.name } });
     res.status(201).json({ item });
   });
 
@@ -58,7 +56,6 @@ export function createMasterController(Model, { label, usageCheck } = {}) {
       { new: true, runValidators: true }
     );
     if (!item) throw ApiError.notFound(`${label} not found`);
-    await recordAudit({ req, action: `${entityType.toLowerCase()}.updated`, entityType, entityId: item._id, metadata: req.body });
     res.json({ item });
   });
 
@@ -71,7 +68,6 @@ export function createMasterController(Model, { label, usageCheck } = {}) {
     }
     const item = await Model.findOneAndDelete({ _id: req.params.id, tenant: req.tenantId });
     if (!item) throw ApiError.notFound(`${label} not found`);
-    await recordAudit({ req, action: `${entityType.toLowerCase()}.deleted`, entityType, entityId: item._id });
     res.json({ success: true });
   });
 

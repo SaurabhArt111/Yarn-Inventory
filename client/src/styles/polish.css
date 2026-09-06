@@ -1,0 +1,122 @@
+@import './tokens.css';
+
+/* =====================================================================
+   Polish layer -- purely additive visual refinement.
+   Nothing here changes markup, class names, component logic, or removes
+   any existing rule; it only smooths motion, adds depth to things that
+   were already interactive, and tidies a few small details. Imported
+   after base.css/components.css so these rules win ties on equal
+   specificity where they intentionally refine an existing selector.
+   ===================================================================== */
+
+html {
+  scroll-behavior: smooth;
+}
+
+::selection {
+  background: var(--color-amber-100);
+  color: var(--color-indigo-900);
+}
+
+/* ---------- Buttons: tactile press + a touch of depth ---------- */
+.btn {
+  transition: background 0.14s ease, border-color 0.14s ease, box-shadow 0.14s ease,
+    transform 0.08s ease, opacity 0.14s ease;
+}
+.btn:active:not(:disabled) {
+  transform: translateY(1px);
+}
+.btn-primary {
+  background: linear-gradient(180deg, var(--color-amber-500), var(--color-amber-600));
+  box-shadow: 0 1px 2px rgba(160, 101, 31, 0.25);
+}
+.btn-primary:hover:not(:disabled) {
+  background: linear-gradient(180deg, var(--color-amber-600), var(--color-amber-700));
+  box-shadow: 0 6px 16px -6px rgba(160, 101, 31, 0.55);
+}
+.btn-secondary:hover:not(:disabled),
+.btn-ghost:hover:not(:disabled) {
+  box-shadow: 0 1px 3px rgba(23, 31, 51, 0.06);
+}
+
+/* ---------- Inputs: smoother focus transition ---------- */
+.input, .select, textarea.input {
+  transition: border-color 0.14s ease, box-shadow 0.14s ease;
+}
+
+/* ---------- Sidebar: smoother slide + clearer active wayfinding ---------- */
+.sidebar {
+  transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.sidebar-link {
+  position: relative;
+  transition: background 0.15s ease, color 0.15s ease, padding-left 0.15s ease;
+}
+.sidebar-link.active {
+  padding-left: 16px;
+}
+.sidebar-link.active::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3px;
+  height: 18px;
+  border-radius: 3px;
+  background: var(--color-amber-500);
+}
+.sidebar-scrim {
+  transition: opacity 0.2s ease;
+}
+
+/* ---------- Cards: lift only on things that are actually clickable ---------- */
+.quality-card {
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
+}
+.quality-card:hover {
+  box-shadow: 0 10px 24px -14px rgba(23, 31, 51, 0.35);
+  transform: translateY(-1px);
+}
+table.data-table tbody tr {
+  transition: background 0.1s ease;
+}
+.tab-btn {
+  transition: color 0.15s ease, border-color 0.15s ease;
+}
+
+/* ---------- Overlays: a slightly springier, more premium easing ---------- */
+.overlay {
+  animation-timing-function: ease-out;
+}
+.modal {
+  animation: pwa-pop-in 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.drawer {
+  animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+}
+@keyframes pwa-pop-in {
+  from { transform: scale(0.97) translateY(4px); opacity: 0; }
+  to { transform: scale(1) translateY(0); opacity: 1; }
+}
+
+/* ---------- Toasts: subtle depth ---------- */
+.toast {
+  box-shadow: var(--shadow-pop), 0 1px 0 rgba(255, 255, 255, 0.06) inset;
+}
+
+/* ---------- Scrollbar: a touch more refined on hover ---------- */
+::-webkit-scrollbar-thumb {
+  transition: background 0.15s ease;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-ink-faint);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .sidebar, .sidebar-link, .quality-card, .btn, .modal, .drawer {
+    transition: none !important;
+    animation: none !important;
+  }
+}

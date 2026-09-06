@@ -32,7 +32,6 @@ async function main() {
       const { StockEntry } = await import('../src/models/StockEntry.js');
       const { Beam } = await import('../src/models/Beam.js');
       const { InventoryTransaction } = await import('../src/models/InventoryTransaction.js');
-      const { AuditLog } = await import('../src/models/AuditLog.js');
       await Promise.all([
         User.deleteMany({ tenant: existing._id }),
         Quality.deleteMany({ tenant: existing._id }),
@@ -41,7 +40,6 @@ async function main() {
         StockEntry.deleteMany({ tenant: existing._id }),
         Beam.deleteMany({ tenant: existing._id }),
         InventoryTransaction.deleteMany({ tenant: existing._id }),
-        AuditLog.deleteMany({ tenant: existing._id }),
         mongoose.connection.collection('counters').deleteMany({ tenant: existing._id }),
       ]);
       await existing.deleteOne();

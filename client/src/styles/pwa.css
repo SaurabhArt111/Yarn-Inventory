@@ -1,0 +1,123 @@
+@import './tokens.css';
+
+/* ---------- Install banner ---------- */
+.pwa-install-banner {
+  position: fixed;
+  left: 20px;
+  bottom: 20px;
+  z-index: 210;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  max-width: 380px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-pop);
+  padding: 14px 16px;
+  animation: pwa-slide-up 0.22s ease;
+}
+.pwa-install-icon img {
+  border-radius: var(--radius-sm);
+  display: block;
+}
+.pwa-install-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 12.5px;
+  color: var(--color-ink-muted);
+  min-width: 0;
+}
+.pwa-install-copy strong {
+  color: var(--color-ink);
+  font-size: 13.5px;
+  font-weight: 600;
+}
+.pwa-install-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex-shrink: 0;
+}
+.pwa-share-glyph {
+  display: inline-block;
+  font-weight: 700;
+  color: var(--color-indigo-800);
+}
+
+@keyframes pwa-slide-up {
+  from { transform: translateY(14px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+@media (max-width: 640px) {
+  .pwa-install-banner {
+    left: 14px;
+    right: 14px;
+    bottom: 14px;
+    max-width: none;
+  }
+}
+
+/* ---------- Update toast body (rendered inside the existing .toast) ---------- */
+.pwa-toast-body {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  width: 100%;
+}
+.pwa-toast-body strong {
+  font-size: 13px;
+  font-weight: 600;
+}
+.pwa-toast-sub {
+  font-size: 11.5px;
+  color: rgba(255, 255, 255, 0.75);
+  margin-top: 2px;
+}
+
+/* ---------- Offline status bar ---------- */
+.pwa-offline-banner {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 7px 14px;
+  font-size: 12.5px;
+  font-weight: 500;
+  color: #fff;
+  background: var(--color-rust-700);
+  box-shadow: 0 2px 10px rgba(23, 31, 51, 0.25);
+  animation: pwa-slide-down 0.2s ease;
+  text-align: center;
+}
+.pwa-offline-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #fff;
+  flex-shrink: 0;
+  animation: pwa-pulse 1.6s ease-in-out infinite;
+}
+
+@keyframes pwa-slide-down {
+  from { transform: translateY(-100%); }
+  to { transform: translateY(0); }
+}
+@keyframes pwa-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.35; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pwa-install-banner, .pwa-offline-banner, .pwa-offline-dot {
+    animation: none;
+  }
+}

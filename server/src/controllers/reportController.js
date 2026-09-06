@@ -1,6 +1,5 @@
 import { catchAsync } from '../utils/catchAsync.js';
 import { ApiError } from '../utils/ApiError.js';
-import { recordAudit } from '../services/auditService.js';
 import * as reportService from '../services/reportService.js';
 import { hasPermission } from '../utils/permissionCheck.js';
 import { PERMISSIONS } from '../constants/permissions.js';
@@ -27,7 +26,6 @@ function makeReportHandler(type) {
 
     if (format === 'csv') {
       const csv = reportService.rowsToCsv(rows);
-      await recordAudit({ req, action: 'report.exported', entityType: 'Report', metadata: { type, format, rows: rows.length } });
       res.setHeader('Content-Type', 'text/csv; charset=utf-8');
       res.setHeader('Content-Disposition', `attachment; filename="${type}-report.csv"`);
       return res.send(csv);
@@ -35,7 +33,6 @@ function makeReportHandler(type) {
 
     if (format === 'xlsx' || format === 'excel') {
       const buffer = await reportService.rowsToExcelBuffer(rows, type);
-      await recordAudit({ req, action: 'report.exported', entityType: 'Report', metadata: { type, format, rows: rows.length } });
       res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
       res.setHeader('Content-Disposition', `attachment; filename="${type}-report.xlsx"`);
       return res.send(Buffer.from(buffer));

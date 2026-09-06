@@ -3,7 +3,6 @@ import { User } from '../models/User.js';
 import { ROLES, ALL_PERMISSIONS, permissionsForRole } from '../constants/permissions.js';
 import { catchAsync } from '../utils/catchAsync.js';
 import { ApiError } from '../utils/ApiError.js';
-import { recordAudit } from '../services/auditService.js';
 
 export const listStaff = catchAsync(async (req, res) => {
   const users = await User.find({ tenant: req.tenantId }).sort({ createdAt: 1 }).lean();
@@ -42,7 +41,6 @@ export const inviteStaff = catchAsync(async (req, res) => {
     permissions: permissions?.length ? permissions : permissionsForRole(role),
   });
 
-  await recordAudit({ req, action: 'staff.created', entityType: 'User', entityId: user._id, metadata: { email, role } });
   res.status(201).json({ item: user.toSafeJSON() });
 });
 
@@ -57,13 +55,6 @@ export const updateStaffPermissions = catchAsync(async (req, res) => {
   if (req.body.permissions) target.permissions = req.body.permissions;
   await target.save();
 
-  await recordAudit({
-    req,
-    action: 'staff.permissions_changed',
-    entityType: 'User',
-    entityId: target._id,
-    metadata: { role: target.role, permissions: target.permissions },
-  });
   res.json({ item: target.toSafeJSON() });
 });
 
@@ -76,6 +67,5 @@ export const updateStaffStatus = catchAsync(async (req, res) => {
   target.status = req.body.status;
   await target.save();
 
-  await recordAudit({ req, action: 'staff.status_changed', entityType: 'User', entityId: target._id, metadata: { status: target.status } });
   res.json({ item: target.toSafeJSON() });
 });

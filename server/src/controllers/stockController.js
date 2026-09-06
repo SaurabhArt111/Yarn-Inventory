@@ -2,7 +2,6 @@ import { StockEntry } from '../models/StockEntry.js';
 import { Beam } from '../models/Beam.js';
 import { catchAsync } from '../utils/catchAsync.js';
 import { ApiError } from '../utils/ApiError.js';
-import { recordAudit } from '../services/auditService.js';
 import { parsePagination, buildPageMeta } from '../utils/pagination.js';
 import * as stockService from '../services/stockService.js';
 import { getStockBalance, getStockBalancesBulk } from '../services/inventoryService.js';
@@ -63,13 +62,6 @@ export const createStockEntry = catchAsync(async (req, res) => {
     userId: req.user._id,
     input: req.body,
   });
-  await recordAudit({
-    req,
-    action: 'stock.created',
-    entityType: 'StockEntry',
-    entityId: stockEntry._id,
-    metadata: { reference: stockEntry.reference, netWeightKg: stockEntry.netWeightKg },
-  });
   res.status(201).json({ item: stockEntry });
 });
 
@@ -80,7 +72,6 @@ export const updateStockEntry = catchAsync(async (req, res) => {
     { new: true, runValidators: true }
   );
   if (!stockEntry) throw ApiError.notFound('Stock entry not found');
-  await recordAudit({ req, action: 'stock.updated', entityType: 'StockEntry', entityId: stockEntry._id, metadata: req.body });
   res.json({ item: stockEntry });
 });
 
@@ -95,7 +86,6 @@ export const cancelStockEntry = catchAsync(async (req, res) => {
     { new: true }
   );
   if (!stockEntry) throw ApiError.notFound('Stock entry not found');
-  await recordAudit({ req, action: 'stock.cancelled', entityType: 'StockEntry', entityId: stockEntry._id });
   res.json({ item: stockEntry });
 });
 
