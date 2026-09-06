@@ -29,9 +29,9 @@ export default function Dashboard() {
 
       {kpis && (
         <div className="kpi-row">
-          <KpiCard label="Total Qualities" value={fmtNum(kpis.totalQualities)} accent="var(--color-indigo-800)" />
+          {/* <KpiCard label="Total Qualities" value={fmtNum(kpis.totalQualities)} accent="var(--color-indigo-800)" />
           <KpiCard label="Total Parties" value={fmtNum(kpis.totalParties)} accent="var(--color-indigo-800)" />
-          <KpiCard label="Operational Companies" value={fmtNum(kpis.totalCompanies)} accent="var(--color-indigo-800)" />
+          <KpiCard label="Operational Companies" value={fmtNum(kpis.totalCompanies)} accent="var(--color-indigo-800)" /> */}
           <KpiCard label="Total Stock Received" value={fmtKg(kpis.totalStockWeightKg)} accent="var(--color-amber-600)" />
           <KpiCard label="Total Consumed" value={fmtKg(kpis.totalConsumedWeightKg)} accent="var(--color-rust-600)" />
           <KpiCard label="Remaining Inventory" value={fmtKg(kpis.remainingInventoryKg)} accent="var(--color-green-600)" />

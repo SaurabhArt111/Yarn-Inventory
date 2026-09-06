@@ -101,7 +101,7 @@ export default function AppLayout() {
           </div>
           <div className="row">
             <span className="muted" style={{ fontSize: 13 }}>
-              {user?.email}
+              {user?.name}
             </span>
             <button className="btn btn-secondary btn-sm" onClick={handleLogout}>
               Log out
