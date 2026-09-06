@@ -1,6 +1,22 @@
-import 'dotenv/config';import express from 'express';import cors from 'cors';import morgan from 'morgan';import mongoose from 'mongoose';import helmet from 'helmet';import rateLimit from 'express-rate-limit';
-import authRoutes from './routes/auth.js';import masters from './routes/masters.js';import stock from './routes/stock.js';import beams from './routes/beams.js';import analytics from './routes/analytics.js';import staff from './routes/staff.js';import {auth} from './middleware/auth.js';
-const app=express();app.disable('x-powered-by');app.use(helmet());app.use(cors({origin:process.env.CLIENT_URL||'http://localhost:5173'}));app.use(express.json({limit:'1mb'}));app.use(morgan('dev'));
-app.use('/api/auth',rateLimit({windowMs:15*60*1000,max:100,standardHeaders:true,legacyHeaders:false}),authRoutes);app.use('/api/masters',auth,masters);app.use('/api/stock',auth,stock);app.use('/api/beams',auth,beams);app.use('/api/analytics',auth,analytics);app.use('/api/staff',auth,staff);
-app.get('/api/health',(req,res)=>res.json({ok:true,service:'Yarn Inventory SaaS API'}));app.use((err,req,res,next)=>{console.error(err);res.status(500).json({message:'Unexpected server error'})});
-const port=process.env.PORT||5000;mongoose.connect(process.env.MONGO_URI||'mongodb://127.0.0.1:27017/yarn_inventory_saas').then(()=>app.listen(port,()=>console.log(`API running on http://localhost:${port}`))).catch(e=>{console.error('MongoDB connection failed:',e.message);process.exit(1)});
+import { createApp } from './app.js';
+import { connectDb } from './config/db.js';
+import { env } from './config/env.js';
+
+async function main() {
+  // Start connecting to MongoDB in the background, but do not block the
+  // HTTP server on it -- DB-dependent routes guard themselves with
+  // requireDb() and return a clean 503 until the connection is ready.
+  connectDb();
+
+  const app = createApp();
+  app.listen(env.port, () => {
+    // eslint-disable-next-line no-console
+    console.log(`[server] Yarn ERP API listening on port ${env.port} (${env.nodeEnv})`);
+  });
+}
+
+main().catch((err) => {
+  // eslint-disable-next-line no-console
+  console.error('[server] Fatal startup error:', err);
+  process.exit(1);
+});

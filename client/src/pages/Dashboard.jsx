@@ -1,16 +1,112 @@
-import React, { useEffect, useState } from "react";
-import { BarChart3, CheckCircle2, ChevronRight, Database, Factory, Package, Users } from "lucide-react";
-import { api } from "../lib/api";
-import { Empty, kg, Loading, num, PageError } from "../components/ui";
+import { useQuery } from '@tanstack/react-query';
+import { useNavigate } from 'react-router-dom';
+import { dashboardApi } from '../api/dashboard.js';
+import { KpiCard, Skeleton, EmptyState, fmtKg, fmtNum } from '../components/ui.jsx';
 
-function Metric({ label, value, icon: Icon }) {
-  return <div className="metric"><div className="metric-icon"><Icon size={17} /></div><span>{label}</span><strong>{value}</strong></div>;
-}
-export default function Dashboard({ onOpen, refresh }) {
-  const [data, setData] = useState(null), [err, setErr] = useState("");
-  useEffect(() => { Promise.all([api("/analytics/overview"), api("/analytics/quality")]).then(([o, q]) => setData({ o, q })).catch((e) => setErr(e.message)); }, [refresh]);
-  if (err) return <PageError text={err} />;
-  if (!data) return <Loading />;
-  const c = data.o.counts;
-  return <div className="content"><div className="welcome"><div><div className="eyebrow">OPERATIONS OVERVIEW</div><h2>Inventory at a glance</h2><p>Track yarn received, beam production and remaining stock across your workspace.</p></div><div className="formula-chip">Beam Weight = Ends × Meter × Denier ÷ 9,000,000</div></div><div className="metrics"><Metric label="Qualities" value={num(c.qualities)} icon={Database} /><Metric label="Parties" value={num(c.parties)} icon={Users} /><Metric label="Total Stock" value={kg(c.stockWeight)} icon={Package} /><Metric label="Beam Weight" value={kg(c.beamWeight)} icon={Factory} /><Metric label="Remaining Inventory" value={kg(data.q.reduce((a, x) => a + x.remainingWeight, 0))} icon={BarChart3} /><Metric label="Ready Beams" value={num(c.beamCount)} icon={CheckCircle2} /></div><section className="section"><div className="section-head"><div><h2>Product / Quality Inventory</h2><p>Click any quality for stock, shade, lot and beam-level traceability.</p></div></div>{data.q.length ? <div className="quality-grid">{data.q.map((x) => <button className="quality-card" key={x.id} onClick={() => onOpen(x.id)}><div className="qc-top"><span className="quality-icon">{x.name.slice(0, 1).toUpperCase()}</span><span className="status-dot" /></div><h3>{x.name}</h3><div className="qc-weight">{kg(x.remainingWeight)}</div><small>remaining inventory</small><div className="qc-row"><span>{x.beamCount} beams</span><span>{x.stockEntries} stock entries <ChevronRight size={14} /></span></div></button>)}</div> : <Empty title="No qualities yet" text="Add a Quality in Master Data, then create your first stock entry." />}</section></div>;
+export default function Dashboard() {
+  const navigate = useNavigate();
+  const summaryQ = useQuery({ queryKey: ['dashboard-summary'], queryFn: dashboardApi.summary });
+  const qualitiesQ = useQuery({ queryKey: ['dashboard-qualities'], queryFn: dashboardApi.qualities });
+
+  const kpis = summaryQ.data?.kpis;
+
+  return (
+    <div>
+      <div className="panel-header">
+        <h1>Dashboard</h1>
+      </div>
+
+      {summaryQ.isLoading && (
+        <div className="kpi-row">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <div className="kpi-card" key={i}>
+              <Skeleton width={80} height={11} style={{ marginBottom: 10 }} />
+              <Skeleton width={100} height={22} />
+            </div>
+          ))}
+        </div>
+      )}
+
+      {kpis && (
+        <div className="kpi-row">
+          <KpiCard label="Total Qualities" value={fmtNum(kpis.totalQualities)} accent="var(--color-indigo-800)" />
+          <KpiCard label="Total Parties" value={fmtNum(kpis.totalParties)} accent="var(--color-indigo-800)" />
+          <KpiCard label="Operational Companies" value={fmtNum(kpis.totalCompanies)} accent="var(--color-indigo-800)" />
+          <KpiCard label="Total Stock Received" value={fmtKg(kpis.totalStockWeightKg)} accent="var(--color-amber-600)" />
+          <KpiCard label="Total Consumed" value={fmtKg(kpis.totalConsumedWeightKg)} accent="var(--color-rust-600)" />
+          <KpiCard label="Remaining Inventory" value={fmtKg(kpis.remainingInventoryKg)} accent="var(--color-green-600)" />
+          <KpiCard label="Total Beams" value={fmtNum(kpis.totalBeams)} accent="var(--color-indigo-800)" />
+          <KpiCard
+            label="Today's Stock"
+            value={fmtKg(kpis.todaysStock?.weightKg)}
+            sub={`${kpis.todaysStock?.count || 0} entries`}
+            accent="var(--color-amber-600)"
+          />
+          <KpiCard
+            label="Today's Production"
+            value={fmtKg(kpis.todaysProduction?.weightKg)}
+            sub={`${kpis.todaysProduction?.count || 0} beams`}
+            accent="var(--color-green-600)"
+          />
+        </div>
+      )}
+
+      <div className="panel-header">
+        <h2>Qualities</h2>
+        <p>Click a quality to see its full stock and production breakdown.</p>
+      </div>
+
+      {qualitiesQ.isLoading && (
+        <div className="quality-grid">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <div className="quality-card" key={i}>
+              <Skeleton width={110} height={14} style={{ marginBottom: 12 }} />
+              <Skeleton width="100%" height={12} style={{ marginBottom: 6 }} />
+              <Skeleton width="100%" height={12} style={{ marginBottom: 6 }} />
+              <Skeleton width="100%" height={12} />
+            </div>
+          ))}
+        </div>
+      )}
+
+      {qualitiesQ.data && qualitiesQ.data.items.length === 0 && (
+        <EmptyState
+          title="No qualities yet"
+          description="Add your first quality under Masters → Qualities to start recording stock and production."
+        />
+      )}
+
+      {qualitiesQ.data && qualitiesQ.data.items.length > 0 && (
+        <div className="quality-grid">
+          {qualitiesQ.data.items.map((q) => (
+            <div className="quality-card" key={q.id} onClick={() => navigate(`/analytics/quality?id=${q.id}`)}>
+              <h4>{q.name}</h4>
+              <div className="qc-row">
+                <span>Received</span>
+                <span className="num">{fmtKg(q.totalReceivedKg)}</span>
+              </div>
+              <div className="qc-row">
+                <span>Consumed</span>
+                <span className="num">{fmtKg(q.consumedKg)}</span>
+              </div>
+              <div className="qc-row remaining">
+                <span>Remaining weight</span>
+                <span className="num">{fmtKg(q.remainingKg)}</span>
+              </div>
+              <div className="qc-row remaining">
+                <span>Remaining cones</span>
+                <span className="num">{fmtNum(q.remainingCones)}</span>
+              </div>
+              <div className="qc-row">
+                <span>Shades / Beams</span>
+                <span className="num">
+                  {q.shadeCount} / {q.beamCount}
+                </span>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
 }
